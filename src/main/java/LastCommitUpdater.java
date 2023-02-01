@@ -1,19 +1,11 @@
+import org.apache.commons.io.IOUtils;
 import org.kohsuke.github.*;
 
 import java.io.IOException;
-import java.sql.Blob;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Date;
+import java.nio.charset.StandardCharsets;
 
 
 public class LastCommitUpdater {
-    public static GitHub github;
-
     private static PagedIterable<GHEventInfo> getUserEvents(GitHub github) throws IOException {
         return github.getMyself().listEvents();
     }
@@ -23,48 +15,39 @@ public class LastCommitUpdater {
         return commits.iterator().next();
     }
 
-    private static boolean checkCommitIsValid(GHEventInfo event) throws IOException {
+    private static boolean checkCommitIsManualPush(GHEventInfo event) throws IOException {
         String actionType = event.getType().name();
         String actionUser = event.getActorLogin();
         String latestCommitMessage = getLatestCommit(event.getRepository()).getCommitShortInfo().getMessage();
-
-        System.out.println(latestCommitMessage);
 
         return actionType.equals(GHEvent.PUSH.name())
                 && actionUser.equals(Constants.GITHUB_USERNAME)
                 && !latestCommitMessage.equals(Constants.COMMIT_MESSAGE);
     }
 
-    private static Date getCommitDate() {
-        Date input = new Date();
-        return Date.from(input.toInstant());
+    private static String getUpdatedReadme(String readmeString, String repositoryName) {
+        return readmeString.replaceAll(Constants.README_LAST_COMMIT_REGEX, "$1" + repositoryName + "$3");
     }
 
     public static void main(String[] args) throws IOException {
-        github = GitHubBuilder.fromPropertyFile().build();
+        GitHub github = GitHubBuilder.fromPropertyFile().build();
         PagedIterable<GHEventInfo> events = getUserEvents(github);
 
         for (GHEventInfo event : events) {
-            if(checkCommitIsValid(event)) {
+            if(checkCommitIsManualPush(event)) {
+                // Grab README.md content so we edit it.
                 GHRepository repository = github.getRepository(Constants.GITHUB_README_REPOSITORY_NAME);
-                String latestCommitSha = getLatestCommit(repository).getSHA1();
+                GHContent content = repository.getFileContent(Constants.README_FILENAME);
 
-                //System.out.println(repository.getFileContent("README.md").getDownloadUrl());
+                // Convert README.md content into a String so we can use RegEx to match the last commit
+                // element and replace it with the most recently updated repository.
+                String readmeMarkdown = IOUtils.toString(content.read(), StandardCharsets.UTF_8);
+                String updatedReadmeMarkdown = getUpdatedReadme(readmeMarkdown, event.getRepository().getName());
 
-                System.out.println("here\n");
-                GHContent content = repository.getFileContent("test.md", latestCommitSha);
-                // content.update(LocalDateTime.now().toString(), Constants.COMMIT_MESSAGE);
+                // This pushes a commit of the README.md changes we just made.
+                content.update(updatedReadmeMarkdown, Constants.COMMIT_MESSAGE);
 
-//                GHCommitBuilder commitBuilder = repository.createCommit();
-//                GHCommit newCommit = commitBuilder
-//                        .author(Constants.GITHUB_USERNAME, Credentials.GITHUB_EMAIL, getCommitDate())
-//                        .committer(Constants.GITHUB_USERNAME, Credentials.GITHUB_EMAIL, getCommitDate())
-//                        .message(Constants.COMMIT_MESSAGE)
-//                        .parent(latestCommitSha)
-//                        .create();
-
-                // repository.createCommit();
-
+                // We only want to update the last commit repository based on the latest GitHub push.
                 break;
             }
         }
