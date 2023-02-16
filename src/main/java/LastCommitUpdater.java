@@ -48,7 +48,7 @@ public class LastCommitUpdater {
      * @throws IOException  Can throw IOException from .getActorLogin() and .getRepository()
      *                      function calls.
      */
-    private static boolean checkActionIsValidPush(GHEventInfo event) throws IOException {
+    private static boolean isActionValidPush(GHEventInfo event) throws IOException {
         String actionType = event.getType().name();
         String actionUser = event.getActorLogin();
         String latestCommitMessage = getLatestCommit(event.getRepository()).getCommitShortInfo().getMessage();
@@ -100,7 +100,7 @@ public class LastCommitUpdater {
         PagedIterable<GHEventInfo> events = getUserEvents(github);
 
         for (GHEventInfo event : events) {
-            if(checkActionIsValidPush(event)) {
+            if(isActionValidPush(event)) {
                 updateReadme(github, event);
 
                 // We only want to update the last commit repository based on the latest GitHub push,
