@@ -26,4 +26,5 @@ commit widget markdown in the appropriate README.
 <br>
 
 ## What's next?
-Currently working on turning this into a Lambda function so it can be invoked on a consistent basis.
+Currently working on turning this into a Lambda function so it can be invoked on a consistent basis without any
+manual work involved.
