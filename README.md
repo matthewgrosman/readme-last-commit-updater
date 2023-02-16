@@ -18,4 +18,4 @@ This project uses the [Java wrapper for the GitHub API](https://github-api.kohsu
 <br>
 
 ## What's next?
-I have no plans to work on this any further. Feel free to fork this or just straight up clone it and run it however you want. I think this could be really cool on something like an AWS Lambda, where the Lambda is triggered by a change to the GitHub commit history.
+Currently working on turning this into a Lambda function so it can be invoked on a consistent basis.
