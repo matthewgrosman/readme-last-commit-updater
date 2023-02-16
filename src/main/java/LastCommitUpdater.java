@@ -1,9 +1,9 @@
+import com.amazonaws.services.lambda.runtime.Context;
 import org.apache.commons.io.IOUtils;
 import org.kohsuke.github.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 
 public class LastCommitUpdater {
     /**
@@ -93,6 +93,24 @@ public class LastCommitUpdater {
 
         // This pushes a commit of the README.md changes we just made.
         content.update(updatedReadmeMarkdown, Constants.COMMIT_MESSAGE);
+    }
+
+    public static String handleRequest(String input, Context context) throws IOException {
+        context.getLogger().log("Input: " + input);
+        return "Hello World - " + input;
+
+//        GitHub github = GitHubBuilder.fromPropertyFile().build();
+//        PagedIterable<GHEventInfo> events = getUserEvents(github);
+//
+//        for (GHEventInfo event : events) {
+//            if(isActionValidPush(event)) {
+//                updateReadme(github, event);
+//
+//                // We only want to update the last commit repository based on the latest GitHub push,
+//                // so we break after the first hit
+//                break;
+//            }
+//        }
     }
 
     public static void main(String[] args) throws IOException {

@@ -20,6 +20,13 @@
             <artifactId>github-api</artifactId>
             <version>1.313</version>
         </dependency>
+
+        <!-- AWS Lambda dependency -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-core</artifactId>
+            <version>1.1.0</version>
+        </dependency>
     </dependencies>
 
 </project>
