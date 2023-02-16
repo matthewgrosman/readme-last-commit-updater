@@ -95,26 +95,15 @@ public class LastCommitUpdater {
         content.update(updatedReadmeMarkdown, Constants.COMMIT_MESSAGE);
     }
 
-    public static String handleRequest(String input, Context context) throws IOException {
-        context.getLogger().log("Input: " + input);
-        return "Hello World - " + input;
+    /**
+     * AWS Lambda handler function. This is the function that gets invoked when we trigger the
+     * Lambda function. This function serves as the entry point to the README updater.
 
-//        GitHub github = GitHubBuilder.fromPropertyFile().build();
-//        PagedIterable<GHEventInfo> events = getUserEvents(github);
-//
-//        for (GHEventInfo event : events) {
-//            if(isActionValidPush(event)) {
-//                updateReadme(github, event);
-//
-//                // We only want to update the last commit repository based on the latest GitHub push,
-//                // so we break after the first hit
-//                break;
-//            }
-//        }
-    }
-
-    public static void main(String[] args) throws IOException {
-        GitHub github = GitHubBuilder.fromPropertyFile().build();
+     * @throws IOException  Can throw IOException due to .fromEnvironment, getUserEvents,
+     *                      isActionValid, and updateReadme functions (basically every function lol).
+     */
+    public static void handleRequest() throws IOException {
+        GitHub github = GitHubBuilder.fromEnvironment().build();
         PagedIterable<GHEventInfo> events = getUserEvents(github);
 
         for (GHEventInfo event : events) {
@@ -122,10 +111,9 @@ public class LastCommitUpdater {
                 updateReadme(github, event);
 
                 // We only want to update the last commit repository based on the latest GitHub push,
-                // so we break after the first hit
+                // so we break after the first hit.
                 break;
             }
         }
-
     }
 }
